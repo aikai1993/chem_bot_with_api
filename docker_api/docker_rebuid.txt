@@ -1,0 +1,4 @@
+sudo docker stop docker_api_container
+sudo docker rm docker_api_container
+sudo docker build -t docker_chem_api .
+sudo docker run -d --restart unless-stopped --name docker_api_container -p 80:80 docker_chem_api
