@@ -1,0 +1,38 @@
+version: "3"
+
+services:
+  chem_bot:
+    container_name: chem_bot
+    build: tgbot/
+    restart: unless-stopped
+    networks:
+      - chem_network
+    depends_on:
+      - chem_db
+
+  chem_api:
+    container_name: chem_api
+    build: docker_api/
+    restart: unless-stopped
+    networks:
+      - chem_network
+    ports:
+      - "80:80"
+
+  chem_db:
+    container_name: chem_db
+    image: mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - "3306:3306"
+    networks:
+      - chem_network
+
+
+networks:
+  chem_network:

@@ -16,18 +16,28 @@ db_user = os.getenv("DB_USER")
 db_password = os.getenv("DB_PASSWORD")
 
 mydb = mysql.connector.connect(
-  host="mysql",
+  host="chem_db",
   user=db_user,
   password=db_password,
-  database="chem_bot"
+  database='chem_bot'
 )
 
 cursor = mydb.cursor()
+#cursor.execute("SHOW DATABASES LIKE 'chem_bot'")
+#result = cursor.fetcone()
+#if not result:
+#    cursor.execute("CREATE DATABASE chem_bot")
+# cursor.execute('CREATE DATABASE chem_bot')
+
+cursor.execute('''CREATE TABLE IF NOT EXISTS users (
+    tg_id INT PRIMARY KEY,
+    brt VARCHAR(50)           
+)''')
+mydb.commit()
 
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    
     cursor.execute('Select * from users where tg_id = %s', (message.from_user.id, ))
     if not cursor.fetchall():
         cursor.execute('INSERT INTO users(tg_id) VALUES (%s)', (message.from_user.id, ))
@@ -100,7 +110,7 @@ def print_total(j):
 
 def try_request(brt, slug, message):
     try:
-        r = requests.get(f'http://chem_api_container/{slug}/{brt}').json()
+        r = requests.get(f'http://chem_api/{slug}/{brt}').json()
         return r
     except Exception as error:
         bot.send_message(message.from_user.id, 'Вы ввели некорректную формулу. Попробуйте снова:')

@@ -2,3 +2,4 @@
 /tgbot/venv
 __pycache__
 /tgbot/.env
+.env
