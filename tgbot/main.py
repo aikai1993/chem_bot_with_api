@@ -6,31 +6,12 @@ import os
 from dotenv import load_dotenv
 import requests
 from db import *
-# import mysql.connector
+
 
 load_dotenv()
 
 bot_token = os.getenv('TOKEN')
 bot = telebot.TeleBot(bot_token)
-
-# db_user = os.getenv("DB_USER")
-# db_password = os.getenv("DB_PASSWORD")
-
-# mydb = mysql.connector.connect(
-#   host="chem_db",
-#   user=db_user,
-#   password=db_password,
-#   database='chem_bot'
-# )
-
-# cursor = mydb.cursor()
-
-# cursor.execute('''CREATE TABLE IF NOT EXISTS users (
-#     tg_id INT PRIMARY KEY,
-#     brt VARCHAR(50)           
-# )''')
-
-# mydb.commit()
 
 
 @bot.message_handler(commands=['start'])
@@ -43,11 +24,13 @@ def start(message):
     keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
     calc_button = types.KeyboardButton('/calc')
     mol_button = types.KeyboardButton('/mol')
-    keyboard.add(calc_button, mol_button)
+    req_button = types.KeyboardButton('/history')
+    keyboard.add(calc_button, mol_button, req_button)
 
     bot.send_message(message.from_user.id, '\n\n'.join(('Привет! Я Химический Бот!',
-    'Если Вы хотите получить изображение молекулы по формуле SMILES, введите /mol.',
-    'Если Вы хотите посчитать молекулярную массу по брутто-формуле, введите /calc')),
+    'Если Вы хотите получить изображение молекулы по формуле SMILES, введите /mol',
+    'Если Вы хотите посчитать молекулярную массу по брутто-формуле, введите /calc',
+    'Если Вы хотите посмотреть историю запросов, введите /history')),
     reply_markup=keyboard)
 
 @bot.message_handler(commands=['mol'])
@@ -60,6 +43,14 @@ def calc(message):
     bot.send_message(message.from_user.id, 'Введите брутто-формулу:')
     bot.register_next_step_handler(message, calc_brutto)
 
+@bot.message_handler(commands=['history'])
+def history(message):
+    cursor.execute('SELECT brt, smiles, date_time from users_history where tg_id = %s', (message.from_user.id, ))
+    all_history = cursor.fetchall()
+    user_brt = [x[0] for x in all_history if x[0]]
+    user_mol = [x[1] for x in all_history if x[1]]
+    text = f'Список всех запросов по брутто-формуле:\n<b>{"    ".join(user_brt)}</b>\n\nСписок всех запросов по формуле SMILES:\n<b>{"    ".join(user_mol)}</b>'
+    bot.send_message(message.from_user.id, text, parse_mode='HTML')
 
 def calc_brutto(message):
     b = message.text
