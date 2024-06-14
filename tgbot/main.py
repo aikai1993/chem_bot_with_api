@@ -5,35 +5,32 @@ from rdkit.Chem import Draw
 import os
 from dotenv import load_dotenv
 import requests
-import mysql.connector
+from db import *
+# import mysql.connector
 
 load_dotenv()
 
 bot_token = os.getenv('TOKEN')
 bot = telebot.TeleBot(bot_token)
 
-db_user = os.getenv("DB_USER")
-db_password = os.getenv("DB_PASSWORD")
+# db_user = os.getenv("DB_USER")
+# db_password = os.getenv("DB_PASSWORD")
 
-mydb = mysql.connector.connect(
-  host="chem_db",
-  user=db_user,
-  password=db_password,
-  database='chem_bot'
-)
+# mydb = mysql.connector.connect(
+#   host="chem_db",
+#   user=db_user,
+#   password=db_password,
+#   database='chem_bot'
+# )
 
-cursor = mydb.cursor()
-#cursor.execute("SHOW DATABASES LIKE 'chem_bot'")
-#result = cursor.fetcone()
-#if not result:
-#    cursor.execute("CREATE DATABASE chem_bot")
-# cursor.execute('CREATE DATABASE chem_bot')
+# cursor = mydb.cursor()
 
-cursor.execute('''CREATE TABLE IF NOT EXISTS users (
-    tg_id INT PRIMARY KEY,
-    brt VARCHAR(50)           
-)''')
-mydb.commit()
+# cursor.execute('''CREATE TABLE IF NOT EXISTS users (
+#     tg_id INT PRIMARY KEY,
+#     brt VARCHAR(50)           
+# )''')
+
+# mydb.commit()
 
 
 @bot.message_handler(commands=['start'])
@@ -67,6 +64,7 @@ def calc(message):
 def calc_brutto(message):
     b = message.text
     cursor.execute('UPDATE users SET brt = %s WHERE tg_id = %s', (b, message.from_user.id))
+    cursor.execute('INSERT INTO users_history(tg_id, brt) VALUES (%s, %s)', (message.from_user.id, b))
     mydb.commit()
     keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
     mol_mass_button = types.KeyboardButton('Молекулярная масса вещества')
@@ -81,6 +79,7 @@ def draw_mol(message):
     try:
         m = Chem.MolFromSmiles(message.text)
         kanon_m = Chem.MolToSmiles(m)
+        cursor.execute('INSERT INTO users_history(tg_id, smiles) VALUES (%s, %s)', (message.from_user.id, kanon_m))
         images = os.listdir('images')
         
         if f'{kanon_m}.png' not in images:
