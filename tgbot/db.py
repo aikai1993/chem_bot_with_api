@@ -31,5 +31,13 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS users_history (
     date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP         
 )''')
 
+cursor.execute ("DROP TABLE users_hash")
+
+cursor.execute('''CREATE TABLE IF NOT EXISTS users_hash (
+    tg_id INT NOT NULL PRIMARY KEY,
+    hash VARCHAR(20)        
+)''')
+
+
 
 mydb.commit()

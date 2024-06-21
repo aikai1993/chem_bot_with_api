@@ -6,6 +6,7 @@ import os
 from dotenv import load_dotenv
 import requests
 from db import *
+from hashids import Hashids
 
 
 load_dotenv()
@@ -13,12 +14,19 @@ load_dotenv()
 bot_token = os.getenv('TOKEN')
 bot = telebot.TeleBot(bot_token)
 
+hashids = Hashids(salt='this is my salt 1', min_length=20)
+
 
 @bot.message_handler(commands=['start'])
 def start(message):
     cursor.execute('Select * from users where tg_id = %s', (message.from_user.id, ))
     if not cursor.fetchall():
         cursor.execute('INSERT INTO users(tg_id) VALUES (%s)', (message.from_user.id, ))
+        mydb.commit()
+
+    cursor.execute('Select * from users_hash where tg_id = %s', (message.from_user.id, ))
+    if not cursor.fetchall():
+        cursor.execute('INSERT INTO users_hash(tg_id, hash) VALUES (%s, %s)', (message.from_user.id, hashids.encode(message.from_user.id)))
         mydb.commit()
 
     keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
