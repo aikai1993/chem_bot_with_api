@@ -3,6 +3,7 @@ from markupsafe import escape
 import mysql.connector
 import os
 from dotenv import load_dotenv
+from datetime import datetime
 
 load_dotenv()
 
@@ -10,7 +11,7 @@ db_user = os.getenv('DB_USER')
 db_password = os.getenv("DB_PASSWORD")
 
 mydb = mysql.connector.connect(
-  host="localhost",
+  host="chem_db",
   user=db_user,
   password=db_password,
   database='chem_bot'
@@ -20,15 +21,20 @@ cursor = mydb.cursor()
 
 app = Flask(__name__)
 
+
 @app.route("/")
 def hello_world():
     return render_template('hello.html')
 
-@app.route('/chem/')
-def chem():
-    cursor.execute('SELECT * FROM users;')
-    print(cursor.fetchall())
-    return render_template('chem.html')
+@app.route('/chem/<hash_id>')
+def chem(hash_id):
+    mydb.reconnect()
+    cursor.execute('SELECT * FROM users_hash where hash = %s;', (hash_id,))
+    tg_id = cursor.fetchone()[0]
+    cursor.execute('SELECT * FROM users_history where tg_id = %s;', (tg_id,))
+    all_history = cursor.fetchall()
+    brt_mol = [(x[2] if x[2] else "", x[3] if x[3] else "", x[4].strftime('%d.%m.%Y %H:%M:%S')) for x in all_history]
+    return render_template('chem.html', brt_mol=brt_mol)
 
 @app.route('/user/<username>')
 def hello_user(username):

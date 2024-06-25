@@ -53,12 +53,10 @@ def calc(message):
 
 @bot.message_handler(commands=['history'])
 def history(message):
-    cursor.execute('SELECT brt, smiles, date_time from users_history where tg_id = %s', (message.from_user.id, ))
-    all_history = cursor.fetchall()
-    user_brt = [x[0] for x in all_history if x[0]]
-    user_mol = [x[1] for x in all_history if x[1]]
-    text = f'Список всех запросов по брутто-формуле:\n<b>{"    ".join(user_brt)}</b>\n\nСписок всех запросов по формуле SMILES:\n<b>{"    ".join(user_mol)}</b>'
-    bot.send_message(message.from_user.id, text, parse_mode='HTML')
+    cursor.execute('Select hash from users_hash where tg_id = %s', (message.from_user.id, ))
+    user_hash = cursor.fetchone()[0]
+    text = f'История запросов: http://91.214.242.240:5000/chem/{user_hash}'
+    bot.send_message(message.from_user.id, text)
 
 def calc_brutto(message):
     b = message.text
@@ -79,6 +77,7 @@ def draw_mol(message):
         m = Chem.MolFromSmiles(message.text)
         kanon_m = Chem.MolToSmiles(m)
         cursor.execute('INSERT INTO users_history(tg_id, smiles) VALUES (%s, %s)', (message.from_user.id, kanon_m))
+        mydb.commit()
         images = os.listdir('images')
         
         if f'{kanon_m}.png' not in images:

@@ -10,6 +10,17 @@ services:
     depends_on:
       - chem_db
 
+  chem_site:
+    container_name: chem_site
+    build: flask_project/
+    restart: unless-stopped
+    networks:
+      - chem_network
+    depends_on:
+      - chem_db
+    ports:
+      - "5000:5000"
+
   chem_api:
     container_name: chem_api
     build: docker_api/
