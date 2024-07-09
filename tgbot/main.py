@@ -61,7 +61,6 @@ def history(message):
 def calc_brutto(message):
     b = message.text
     cursor.execute('UPDATE users SET brt = %s WHERE tg_id = %s', (b, message.from_user.id))
-    cursor.execute('INSERT INTO users_history(tg_id, brt) VALUES (%s, %s)', (message.from_user.id, b))
     mydb.commit()
     keyboard = types.ReplyKeyboardMarkup(row_width=2, resize_keyboard=True)
     mol_mass_button = types.KeyboardButton('Молекулярная масса вещества')
@@ -76,7 +75,7 @@ def draw_mol(message):
     try:
         m = Chem.MolFromSmiles(message.text)
         kanon_m = Chem.MolToSmiles(m)
-        cursor.execute('INSERT INTO users_history(tg_id, smiles) VALUES (%s, %s)', (message.from_user.id, kanon_m))
+        cursor.execute('INSERT INTO users_history(tg_id, smiles, is_valid) VALUES (%s, %s, %s)', (message.from_user.id, kanon_m, 1))
         mydb.commit()
         images = os.listdir('images')
         
@@ -86,6 +85,8 @@ def draw_mol(message):
 
         bot.send_photo(message.from_user.id, photo=open(f'images/{kanon_m}.png', 'rb'))
     except Exception as error:
+        cursor.execute('INSERT INTO users_history(tg_id, smiles, is_valid) VALUES (%s, %s, %s)', (message.from_user.id, message.text, 0))
+        mydb.commit()
         print(error)
         bot.send_message(message.from_user.id, f'Некорректный ввод. Попробуйте снова:')
         bot.register_next_step_handler(message, draw_mol)
@@ -108,8 +109,12 @@ def print_total(j):
 def try_request(brt, slug, message):
     try:
         r = requests.get(f'http://chem_api/{slug}/{brt}').json()
+        cursor.execute('INSERT INTO users_history(tg_id, brt, is_valid) VALUES (%s, %s, %s)', (message.from_user.id, brt, 1))
+        mydb.commit()
         return r
     except Exception as error:
+        cursor.execute('INSERT INTO users_history(tg_id, brt, is_valid) VALUES (%s, %s, %s)', (message.from_user.id, brt, 0))
+        mydb.commit()
         bot.send_message(message.from_user.id, 'Вы ввели некорректную формулу. Попробуйте снова:')
         bot.register_next_step_handler(message, calc_brutto)    
 

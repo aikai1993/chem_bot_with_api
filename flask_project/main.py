@@ -33,7 +33,7 @@ def chem(hash_id):
     tg_id = cursor.fetchone()[0]
     cursor.execute('SELECT * FROM users_history where tg_id = %s;', (tg_id,))
     all_history = cursor.fetchall()
-    brt_mol = [(x[2] if x[2] else "", x[3] if x[3] else "", x[4].strftime('%d.%m.%Y %H:%M:%S')) for x in all_history]
+    brt_mol = [(x[2] if x[2] else "", x[3] if x[3] else "", x[5].strftime('%d.%m.%Y %H:%M:%S'), x[4]) for x in all_history]
     return render_template('chem.html', brt_mol=brt_mol)
 
 @app.route('/user/<username>')

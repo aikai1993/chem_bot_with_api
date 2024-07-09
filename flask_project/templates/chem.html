@@ -18,10 +18,14 @@
         </thead>
         <tbody>
           {% for index in range(brt_mol|length) %}
-          <tr>
+          <tr {% if brt_mol[index][3] == 0 %} class="table-danger" {% endif %}>
             <th class="text-center align-middle" scope="row" style="width: 5%; word-break: break-all;">{{ index + 1 }}</th>
-            <td class="text-center align-middle" style="width: 20%; word-break: break-all;">{{ brt_mol[index][0] }}</td>
-            <td class="text-center align-middle" style="width: 60%; word-break: break-all;">{{ brt_mol[index][1] }}</td>
+            <td class="text-center align-middle" style="width: 20%; word-break: break-all;">
+              {% if brt_mol[index][3] == 0 and brt_mol[index][0] != "" %} <b>Incorrect:</b> {% endif %} {{ brt_mol[index][0] }}
+            </td>
+            <td class="text-center align-middle" style="width: 60%; word-break: break-all;">
+              {% if brt_mol[index][3] == 0 and brt_mol[index][1] != "" %} <b>Incorrect:</b> {% endif %} {{ brt_mol[index][1] }}
+            </td>
             <td class="text-center align-middle" style="width: 15%; word-break: break-all;">{{ brt_mol[index][2] }}</td>
           </tr>
           {% endfor %}

@@ -28,6 +28,7 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS users_history (
     tg_id INT NOT NULL,
     brt VARCHAR(50),
     smiles VARCHAR(512),
+    is_valid BOOL,
     date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP         
 )''')
 
