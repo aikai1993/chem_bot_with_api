@@ -43,7 +43,7 @@ def result_calc(brutto, exact=False):
     for k, v in result.items():
         total_result['elements'][k] = {
                 'mass': f'{round(v, 4):.4f}',
-                'percent': f'{round(v / float(total_result['total_mass'])* 100, 2)}'
+                'percent': f'{round(v / float(total_result['total_mass'])* 100, 4):.4f}'
             }
 
     return total_result

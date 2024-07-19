@@ -1,6 +1,6 @@
-/tgbot/images
 /tgbot/venv
 __pycache__
 /tgbot/.env
 .env
 flask_project/venv
+images

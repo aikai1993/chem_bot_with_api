@@ -9,6 +9,8 @@ services:
       - chem_network
     depends_on:
       - chem_db
+    volumes:
+      - ./tgbot/images:/app/images
 
   chem_site:
     container_name: chem_site
@@ -20,6 +22,8 @@ services:
       - chem_db
     ports:
       - "5000:5000"
+    volumes:
+      - ./flask_project/static/images:/app/static/images
 
   chem_api:
     container_name: chem_api
